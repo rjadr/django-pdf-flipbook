@@ -30,7 +30,7 @@ Then run:
 - `$ python manage.py migrate`
 - `$ python manage.py runserver`
 
-Upload the pdfs via the admin interface and access the files via the {yoururl}/flipbook/.
+Upload the pdfs via the admin interface and access the files via {yoururl}/flipbook/.
 
 ## Flipbook plugins
 I have implemented [pdfjs-flipbook](https://github.com/iberan/pdfjs-flipbook) by default, which is a bit buggy but free. However, I reccomend using [dFlip PDF FlipBook jQuery Plugin](https://codecanyon.net/item/dflip-flipbook-jquery-plugin/15834127). Simply swap the `index.html` files in the templates dir, and populate `flipbook/static/flipbook/dflip/` with the `js`, `sound`, `images`, `fonts` and `css` folders from the [dFlip PDF FlipBook jQuery Plugin](https://codecanyon.net/item/dflip-flipbook-jquery-plugin/15834127).
