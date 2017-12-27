@@ -47,4 +47,3 @@ Change the dependency URLS in dflip.js as follows and you're good to go:
     imageResourcesPath: url + "images/pdfjs/",
     cMapUrl: url + "cmaps/", 
 ``` 
-`
