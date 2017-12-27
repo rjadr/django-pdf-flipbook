@@ -5,7 +5,7 @@ A Django app that displays a pdf library in a grid and lets you read them as fli
 - Copy the `flipbook` folder to the root of your django project.
 
 Install the following requirements:
-- Install [Imagemagick](http://docs.wand-py.org/en/0.4.1/guide/install.html#install-imagemagick-on-debian-ubuntu) for thumbnail generation
+- Install [Imagemagick](http://docs.wand-py.org/en/0.4.4/guide/install.html#install-imagemagick-on-debian-ubuntu) for thumbnail generation
 - `pip install Wand`
 - `pip install python-magic`
 
