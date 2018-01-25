@@ -23,9 +23,6 @@ TEMPLATES = [
 ```
 - `TEMP_ROOT = os.path.join(DATA_DIR, 'media/tmp')`
 
-In urls.py add:
-- `url(r'^flipbook/', include('flipbook.urls')),` to `urlpatterns`
-
 Then run:
 - `$ python manage.py migrate`
 - `$ python manage.py runserver`
