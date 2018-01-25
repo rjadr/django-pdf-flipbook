@@ -1,23 +1,17 @@
+{% extends CMS_TEMPLATE %}
 {% load static %}
-<!DOCTYPE html>
-<html>
+{% block content %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" href="{% static 'flipbook/dflip/css/themify-icons.min.css' %}">
+<link rel="stylesheet" href="{% static 'flipbook/dflip/css/dflip.min.css' %}">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    
+<script>
+    var url = "{% static 'flipbook/dflip/' %}";
+</script>
+<script src="{% static 'flipbook/dflip/js/dflip.js' %}"></script>
 
-<head>
-    <meta charset="utf-8">
-    <title>Django Pdf Flipbook</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{% static 'flipbook/dflip/css/themify-icons.min.css' %}">
-    <link rel="stylesheet" href="{% static 'flipbook/dflip/css/dflip.min.css' %}">
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script>
-        var url = "{% static 'flipbook/dflip/' %}";
-    </script>
-    <script src="{% static 'flipbook/dflip/js/dflip.js' %}"></script>
-</head>
-
-<body>
     <div style="width:100%">
         <!-- List of uploaded documents -->
         {% if documents %} 
@@ -30,6 +24,4 @@
             <p>No documents.</p>
         {% endif %}
     </div>
-</body>
-
-</html>
+{% endblock content %}
