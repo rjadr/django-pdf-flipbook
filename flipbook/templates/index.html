@@ -1,54 +1,43 @@
+{% extends CMS_TEMPLATE %}
 {% load static %}
-<!DOCTYPE html>
-<html>
+{% block content %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'flipbook/pdfjs-flipbook/css/jquery.fancybox.min.css' %}" />
+<script type="text/javascript" src="{% static 'flipbook/pdfjs-flipbook/js/jquery.fancybox.min.js' %}"></script>
+<script>
+    // Adjust iframe height according to the contents
+    parent.jQuery.fancybox.getInstance().update();
 
-<head>
-    <meta charset="utf-8">
-    <title>Django Pdf Flipbook</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'flipbook/pdfjs-flipbook/css/jquery.fancybox.min.css' %}" />
-    <script type="text/javascript" src="{% static 'flipbook/pdfjs-flipbook/js/jquery.fancybox.min.js' %}"></script>
-    <script>
-        // Adjust iframe height according to the contents
-        parent.jQuery.fancybox.getInstance().update();
+    // Close current fancyBox instance
+    parent.jQuery.fancybox.getInstance().close();
+</script>
+<style>
+    .fancybox-slide--iframe .fancybox-content {
+        width: 95%;
+        height: 95%;
+        max-width: 100%;
+        max-height: 100%;
+        margin: 0;
+    }
+</style>
+<div style="width:100%">
+    <!-- List of uploaded documents -->
+    {% if documents %} {% for document in documents %}
 
-        // Close current fancyBox instance
-        parent.jQuery.fancybox.getInstance().close();
-    </script>
-    <style>
-        .fancybox-slide--iframe .fancybox-content {
-            width: 95%;
-            height: 95%;
-            max-width: 100%;
-            max-height: 100%;
-            margin: 0;
-        }
-    </style>
-</head>
-
-<body>
-    <div style="width:100%">
-        <!-- List of uploaded documents -->
-        {% if documents %} 
-            {% for document in documents %}
-
-            <div style="float:left; width:200px; height:320px; margin:10px;" class="thumbnail">
-                <a data-fancybox data-type="iframe" data-src="viewer.html?file={{ document.flipbook_document.url }}#magazineMode=true" href="javascript:;">
-                    <img src="{{ document.flipbook_image.url }}" alt="{{ document.flipbook_title }}" style="width:100%">
-                    <div class="caption">
-                        <p>{{ document.flipbook_title }}</p>
-                    </div>
-                </a>
+    <div style="float:left; width:200px; height:320px; margin:10px;" class="thumbnail">
+        <a data-fancybox data-type="iframe" data-src="viewer.html?file={{ document.flipbook_document.url }}#magazineMode=true" href="javascript:;">
+            <img src="{{ document.flipbook_image.url }}" alt="{{ document.flipbook_title }}" style="width:100%">
+            <div class="caption">
+                <p>{{ document.flipbook_title }}</p>
             </div>
-            <div class="flip-book-container" src="{{ document.flipbook_document.url }}"></div>
-            {% endfor %} 
-        {% else %}
-            <p>No documents.</p>
-        {% endif %}
-
+        </a>
     </div>
-</body>
+    <div class="flip-book-container" src="{{ document.flipbook_document.url }}"></div>
+    {% endfor %} {% else %}
+    <p>No documents.</p>
+    {% endif %}
 
-</html>
+</div>
+{% endblock content %}
