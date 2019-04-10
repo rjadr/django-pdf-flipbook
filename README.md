@@ -11,19 +11,30 @@ Install the following requirements:
 - `pip install Pillow`
 
 In settings.py add:
+-
+```DATA_DIR = os.path.dirname(os.path.dirname(__file__))
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(DATA_DIR, 'media')
+TEMP_ROOT = os.path.join(DATA_DIR, 'media/tmp')
+```
 - `'flipbook',` to `INSTALLED_APPS`
+
+In urls.py add:
+- `from django.urls import include`
+- `path('flipbook/', include('flipbook.urls')),` to urlpatterns
+When running locally using runserver add to urls.py:
+-
+```from django.conf import settings
+from django.conf.urls import url
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.views.static import serve```
 - 
+```if settings.DEBUG:
+    urlpatterns = [
+        url(r'^media/(?P<path>.*)$', serve,
+            {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
+        ] + staticfiles_urlpatterns() + urlpatterns
 ```
-TEMPLATES = [
-    {
-        'DIRS': [
-            os.path.join(BASE_DIR, 'flipbook', 'templates'), 
-            ], 
-    },
-]
-```
-- `TEMP_ROOT = os.path.join(DATA_DIR, 'media/tmp')`
-- or: `TEMP_ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media/tmp')`
 
 Then run:
 - `$ python manage.py makemigrations flipbook`
