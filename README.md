@@ -26,7 +26,8 @@ TEMPLATES = [
 - or: `TEMP_ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media/tmp')`
 
 Then run:
-- `$ python manage.py migrate`
+- `$ python manage.py makemigrations flipbook`
+- `$ python manage.py migrate flipbook`
 - `$ python manage.py runserver`
 
 Add the Flipbook app to a page and upload the pdfs via the admin interface.
