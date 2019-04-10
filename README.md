@@ -28,13 +28,14 @@ TEMP_ROOT = os.path.join(DATA_DIR, 'media/tmp')
 In urls.py add:
 - `from django.urls import include, path`
 - `path('flipbook/', include('flipbook.urls')),` to urlpatterns
-- When running locally using runserver also add to urls.py:
+
+When running locally using runserver also add to urls.py:
 ```
 from django.conf import settings
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.static import serve
 ```
-- 
+
 ```
 if settings.DEBUG:
     urlpatterns = [
