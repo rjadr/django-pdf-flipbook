@@ -21,7 +21,7 @@ TEMP_ROOT = os.path.join(DATA_DIR, 'media/tmp')
 ```
 
 In urls.py add:
-- `from django.urls import include`
+- `from django.urls import include, path`
 - `path('flipbook/', include('flipbook.urls')),` to urlpatterns
 - When running locally using runserver add to urls.py:
 ```
