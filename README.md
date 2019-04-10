@@ -67,4 +67,4 @@ Change the dependency urls in dflip.js as follows and you're good to go:
     cMapUrl: url + "cmaps/", 
 ``` 
 ## 'not authorized' policy error
-If you get a 'not authorized' policy error when uploading a pdf, this has to do with recent changes to ImageMagick. A workaround can be found [here](https://github.com/HazyResearch/fonduer/issues/170). Then restart apache.
+If you get a 'not authorized' policy error when uploading a pdf, this has to do with recent changes to ImageMagick. A workaround can be found [here](https://github.com/HazyResearch/fonduer/issues/170). Restart apache afterwards.
