@@ -9,6 +9,7 @@ Install the following requirements:
 - `pip install Wand`
 - `pip install python-magic`
 - `pip install Pillow`
+
 For installation on Max OS X:
 - Install Ghostscript: `$ brew install ghostscript`
 - When running into an 'ImportError: MagickWand shared library not found.' on Mac OS X, try [this solution](https://stackoverflow.com/questions/37011291/python-wand-image-is-not-recognized/41772062#41772062)
