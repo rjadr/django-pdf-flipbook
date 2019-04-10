@@ -22,8 +22,7 @@ TEMP_ROOT = os.path.join(DATA_DIR, 'media/tmp')
 In urls.py add:
 - `from django.urls import include`
 - `path('flipbook/', include('flipbook.urls')),` to urlpatterns
-When running locally using runserver add to urls.py:
--
+- When running locally using runserver add to urls.py:
 ```from django.conf import settings
 from django.conf.urls import url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
@@ -58,3 +57,5 @@ Change the dependency URLS in dflip.js as follows and you're good to go:
     imageResourcesPath: url + "images/pdfjs/",
     cMapUrl: url + "cmaps/", 
 ``` 
+## 'not authorized' policy error
+If you get a 'not authorized' policy error when uploading a pdf, this has to do with recent changes to ImageMagick. A workaround can be found [here](https://github.com/HazyResearch/fonduer/issues/170). Then restart apache.
