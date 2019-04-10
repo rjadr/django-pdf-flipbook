@@ -49,7 +49,7 @@ Then run:
 - `$ python manage.py migrate flipbook`
 - `$ python manage.py runserver`
 
-Add the Flipbook app to a page and upload the pdfs via the admin interface.
+Add the Flipbook app to a page (or browse to `http://127.0.0.1:8000/flipbook/`)  and upload the pdfs via the admin interface.
 
 ## Flipbook plugins
 I have implemented [pdfjs-flipbook](https://github.com/iberan/pdfjs-flipbook) by default, which is a bit buggy but free. However, I recommend using [dFlip PDF FlipBook jQuery Plugin](https://codecanyon.net/item/dflip-flipbook-jquery-plugin/15834127). Simply change the template in `views.py` from `index.html` to `index-dflip.html`, and populate `flipbook/static/flipbook/dflip/` with the `js`, `sound`, `images`, `fonts` and `css` folders from the [dFlip PDF FlipBook jQuery Plugin](https://codecanyon.net/item/dflip-flipbook-jquery-plugin/15834127).
