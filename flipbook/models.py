@@ -2,7 +2,7 @@
 from django.db import models
 from django.db.models import FileField
 from django.db.models.signals import post_delete, post_save
-from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from django.core.files.storage import default_storage
 from django.utils import timezone
 from django.utils.crypto import get_random_string
@@ -13,27 +13,6 @@ import magic
 from wand.image import Image  
 from wand.color import Color  
 
-class FileValidator(object):
-    error_messages = {
-     'content_type': "Files of type %(content_type)s are not supported.",
-    }
-
-    def __init__(self, content_types):
-        self.content_types = content_types
-
-    def __call__(self, data):
-        if self.content_types:
-            content_type = magic.from_buffer(data.read(), mime=True)
-            # File Pointer returns to beginning
-            data.seek(0)
-            if content_type not in self.content_types:
-                params = { 'content_type': content_type }
-                raise ValidationError(self.error_messages['content_type'],
-                                   'content_type', params)
-
-    def __eq__(self, other):
-        return isinstance(other, FileValidator)
-
 class PdfFlipbook(models.Model):  
     flipbook_title = models.CharField(max_length=24,
                                         blank=False,
@@ -43,7 +22,7 @@ class PdfFlipbook(models.Model):
     flipbook_document = models.FileField(upload_to="flipbook/",
                                             blank=False,
                                             null=False,
-                                            validators=[FileValidator('application/pdf')])
+                                            validators=[FileExtensionValidator(['pdf'])])
     flipbook_image = models.ImageField(upload_to="flipbook/",  # param optional due to post create
                                           editable=False)
 
