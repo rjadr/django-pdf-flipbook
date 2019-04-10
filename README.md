@@ -53,6 +53,8 @@ Add the Flipbook app to a page and upload the pdfs via the admin interface.
 ## Flipbook plugins
 I have implemented [pdfjs-flipbook](https://github.com/iberan/pdfjs-flipbook) by default, which is a bit buggy but free. However, I recommend using [dFlip PDF FlipBook jQuery Plugin](https://codecanyon.net/item/dflip-flipbook-jquery-plugin/15834127). Simply swap the `index.html` files in the templates dir, and populate `flipbook/static/flipbook/dflip/` with the `js`, `sound`, `images`, `fonts` and `css` folders from the [dFlip PDF FlipBook jQuery Plugin](https://codecanyon.net/item/dflip-flipbook-jquery-plugin/15834127).
 
+Change the template in `views.py` to use the `index-dflip.html` if you using dFlip PDF FlipBook jQuery Plugin.
+
 Change the dependency URLS in dflip.js as follows and you're good to go: 
 ```
     pdfjsSrc: url + "js/libs/pdf.min.js",
