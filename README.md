@@ -11,13 +11,13 @@ Install the following requirements:
 - `pip install Pillow`
 
 In settings.py add:
--
+- `'flipbook',` to `INSTALLED_APPS`
+- 
 ```DATA_DIR = os.path.dirname(os.path.dirname(__file__))
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(DATA_DIR, 'media')
 TEMP_ROOT = os.path.join(DATA_DIR, 'media/tmp')
 ```
-- `'flipbook',` to `INSTALLED_APPS`
 
 In urls.py add:
 - `from django.urls import include`
