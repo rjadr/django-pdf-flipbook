@@ -8,6 +8,7 @@ Install the following requirements:
 - Install [Imagemagick](http://docs.wand-py.org/en/0.4.4/guide/install.html#install-imagemagick-on-debian-ubuntu) for thumbnail generation
 - `pip install Wand`
 - `pip install python-magic`
+- `pip install Pillow`
 
 In settings.py add:
 - `'flipbook',` to `INSTALLED_APPS`
@@ -22,6 +23,7 @@ TEMPLATES = [
 ]
 ```
 - `TEMP_ROOT = os.path.join(DATA_DIR, 'media/tmp')`
+- or: `TEMP_ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'media/tmp')`
 
 Then run:
 - `$ python manage.py migrate`
