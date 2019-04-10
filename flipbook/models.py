@@ -116,7 +116,7 @@ def file_cleanup(sender, **kwargs):
     >>> from django.db.models.signals import post_delete
     >>> post_delete.connect(file_cleanup, sender=MyModel, dispatch_uid="mymodel.file_cleanup")
     """
-    for fieldname in sender._meta.get_all_field_names():
+    for fieldname in sender._meta.get_fields():
         try:
             field = sender._meta.get_field(fieldname)
         except:
