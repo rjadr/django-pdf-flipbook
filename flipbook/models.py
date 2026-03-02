@@ -39,6 +39,21 @@ class PdfFlipbook(models.Model):
         validators=[FileExtensionValidator(['pdf']), validate_pdf_mime_type],
     )
     flipbook_image = models.ImageField(upload_to="flipbook/", editable=False, blank=True)
+    sort_order = models.PositiveIntegerField(
+        default=0,
+        db_index=True,
+        help_text="Lower numbers appear first. Items with the same number are sorted by upload date.",
+    )
+    # Optional Wagtail collection support. Requires wagtail to be installed.
+    # FK is defined as a lazy string reference so the model loads fine without Wagtail.
+    collection = models.ForeignKey(
+        'wagtailcore.Collection',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='flipbook_documents',
+        help_text="Wagtail collection this PDF belongs to (optional).",
+    )
 
     def save(self, *args, **kwargs):
         if self.pk:  # updating an existing object
@@ -62,7 +77,7 @@ class PdfFlipbook(models.Model):
         return "[{}] {} {}".format(self.flipbook_title, self.flipbook_document, self.flipbook_image)
 
     class Meta:
-        ordering = ['-modified_date']  # newest first
+        ordering = ['sort_order', '-modified_date']
 
 
 @receiver(post_save, sender=PdfFlipbook, dispatch_uid="create_image_after_save")

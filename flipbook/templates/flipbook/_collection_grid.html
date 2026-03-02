@@ -1,0 +1,20 @@
+{% load static %}
+{# Partial template used by {% flipbook_collection %} template tag and the Wagtail FlipbookCollectionBlock. #}
+{# DearFlip CSS/JS must already be present on the page (loaded by the parent template). #}
+
+{% if documents %}
+<div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3 flipbook-grid">
+    {% for document in documents %}
+    <div class="col">
+        <div class="_df_thumb"
+             source="{{ document.flipbook_document.url }}"
+             thumb="{{ document.flipbook_image.url }}"
+             tags="{{ document.flipbook_title }}">
+            {{ document.flipbook_title }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-muted">No documents found.</p>
+{% endif %}

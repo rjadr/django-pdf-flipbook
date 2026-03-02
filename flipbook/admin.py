@@ -1,12 +1,25 @@
+from django.apps import apps
 from django.contrib import admin
 from django.utils.html import format_html
 from flipbook.models import PdfFlipbook
 
+_wagtail = apps.is_installed('wagtail')
+
 
 @admin.register(PdfFlipbook)
 class PdfFlipbookAdmin(admin.ModelAdmin):
-    list_display = ('flipbook_title', 'modified_date', 'admin_thumbnail')
-    list_filter = ('modified_date',)
+    list_display = (
+        'admin_thumbnail',
+        'flipbook_title',
+        'sort_order',
+        *(['collection'] if _wagtail else []),
+        'modified_date',
+    )
+    list_editable = ('sort_order',)
+    list_filter = (
+        'modified_date',
+        *(['collection'] if _wagtail else []),
+    )
     search_fields = ('flipbook_title',)
     readonly_fields = ('flipbook_image', 'modified_date')
 

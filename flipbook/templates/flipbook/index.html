@@ -8,25 +8,36 @@
       crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/dflip.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/themify-icons.min.css">
+<style>
+    /* Disable DearFlip thumbnail hover slide-up and caption overlay */
+    .df-ui-thumb:hover .df-ui-thumb-img img,
+    .df-ui-thumb:focus .df-ui-thumb-img img { transform: none !important; transition: none !important; }
+    .df-ui-thumb .df-ui-thumb-caption,
+    .df-ui-thumb:hover .df-ui-thumb-caption { opacity: 0 !important; pointer-events: none !important; }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <h1 class="mb-4">PDF Library</h1>
 
-    {% if documents %}
-    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
-        {% for document in documents %}
-        <div class="col">
-            <div class="_df_thumb"
-                 source="{{ document.flipbook_document.url }}"
-                 thumb="{{ document.flipbook_image.url }}"
-                 tags="{{ document.flipbook_title }}">
-                {{ document.flipbook_title }}
-            </div>
-        </div>
+    {# Collection filter (only rendered when Wagtail collections are available) #}
+    {% if collections %}
+    <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+        <a href="?" class="btn btn-sm {% if not active_collection %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+            All
+        </a>
+        {% for col in collections %}
+        <a href="?collection={{ col.pk }}"
+           class="btn btn-sm {% if active_collection == col.pk %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+            {{ col.name }}
+        </a>
         {% endfor %}
     </div>
+    {% endif %}
+
+    {% if documents %}
+    {% include 'flipbook/_collection_grid.html' %}
 
     {# Pagination #}
     {% if documents.has_other_pages %}

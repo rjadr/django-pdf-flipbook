@@ -36,7 +36,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-cms = ["django-cms>=4.0"]
+cms = ["django-cms>=4.0", "wagtail>=5.0"]
 dev = [
     "pytest>=8.0",
     "pytest-django>=4.8",
