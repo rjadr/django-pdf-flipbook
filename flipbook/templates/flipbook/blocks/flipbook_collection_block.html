@@ -8,10 +8,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/dflip.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/themify-icons.min.css">
     <style>
-        .df-ui-thumb:hover .df-ui-thumb-img img,
-        .df-ui-thumb:focus .df-ui-thumb-img img { transform: none !important; transition: none !important; }
-        .df-ui-thumb .df-ui-thumb-caption,
-        .df-ui-thumb:hover .df-ui-thumb-caption { opacity: 0 !important; pointer-events: none !important; }
+        /* Disable DearFlip thumbnail hover slide-up and title overlay */
+        ._df_book-cover { transition: none !important; }
+        ._df_book-cover:hover { transform: none !important; }
+        ._df_book-title { display: none !important; }
     </style>
 
     {% include 'flipbook/_collection_grid.html' %}
