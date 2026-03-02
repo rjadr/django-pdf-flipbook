@@ -1,70 +1,122 @@
 # django-pdf-flipbook
-A Django app that displays a pdf library in a grid and lets you read them as flipbooks.
+
+A reusable Django app that displays a PDF library in a responsive grid and lets visitors read them as interactive flipbooks.
+
+## Requirements
+
+- Python ≥ 3.10
+- Django ≥ 4.2
+- [Poppler](https://poppler.freedesktop.org/) (used by `pdf2image` for thumbnail generation)
 
 ## Installation
-- Copy the `flipbook` folder to the root of your django project.
 
-Install the following requirements:
-- Install [Imagemagick](http://docs.wand-py.org/en/0.4.4/guide/install.html#install-imagemagick-on-debian-ubuntu) for thumbnail generation
-- `pip install Wand`
-- `pip install python-magic`
-- `pip install Pillow`
+### 1. Install system dependency (Poppler)
 
-For installation on Max OS X:
-- Install Ghostscript: `$ brew install ghostscript`
-- When running into an 'ImportError: MagickWand shared library not found.' on Mac OS X, try [this solution](https://stackoverflow.com/questions/37011291/python-wand-image-is-not-recognized/41772062#41772062)
-
-
-In settings.py add:
-- `'flipbook',` to `INSTALLED_APPS`
-- 
+**macOS**
+```bash
+brew install poppler
 ```
+
+**Debian / Ubuntu**
+```bash
+sudo apt-get install poppler-utils
+```
+
+### 2. Install the package
+
+```bash
+pip install git+https://github.com/rjadr/django-pdf-flipbook.git
+```
+
+Python dependencies installed automatically: `Django>=4.2`, `Pillow>=10.0`, `pdf2image>=1.17`, `python-magic>=0.4.27`.
+
+### 3. Configure `settings.py`
+
+```python
+INSTALLED_APPS = [
+    ...
+    'flipbook',
+]
+
 DATA_DIR = os.path.dirname(os.path.dirname(__file__))
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(DATA_DIR, 'media')
-TEMP_ROOT = os.path.join(DATA_DIR, 'media/tmp')
 ```
 
-In urls.py add:
-- `from django.urls import include, path`
-- `path('flipbook/', include('flipbook.urls')),` to urlpatterns
+> `TEMP_ROOT` is **no longer required** — thumbnail generation runs entirely through Django's storage API.
 
-When running locally using runserver also add to urls.py:
+### 4. Configure `urls.py`
+
+```python
+from django.urls import include, path
+
+urlpatterns = [
+    ...
+    path('flipbook/', include('flipbook.urls')),
+]
 ```
+
+For local development with `runserver`, also add media file serving:
+
+```python
 from django.conf import settings
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.views.static import serve
-```
+from django.conf.urls.static import static
 
-```
 if settings.DEBUG:
-    urlpatterns = [
-        url(r'^media/(?P<path>.*)$', serve,
-            {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
-        ] + staticfiles_urlpatterns() + urlpatterns
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 ```
 
-Then run:
-- `$ python manage.py makemigrations flipbook`
-- `$ python manage.py migrate flipbook`
-- `$ python manage.py runserver`
+### 5. Run migrations
 
-Add the Flipbook app to a page (or browse to `http://127.0.0.1:8000/flipbook/`)  and upload the pdfs via the admin interface.
-
-## Flipbook plugins
-I have implemented [pdfjs-flipbook](https://github.com/iberan/pdfjs-flipbook) by default, which is a bit buggy but free. However, I recommend using [dFlip PDF FlipBook jQuery Plugin](https://dearflip.com/responsive-html5-flipbook-jquery-plugin/). Simply change the template in `views.py` from `index.html` to `index-dflip.html`, and populate `flipbook/static/flipbook/dflip/` with the `js`, `sound`, `images`, `fonts` and `css` folders from the [dFlip PDF FlipBook jQuery Plugin](https://dearflip.com/responsive-html5-flipbook-jquery-plugin/).
-
-Change the dependency urls in dflip.js as follows and you're good to go: 
+```bash
+python manage.py makemigrations flipbook
+python manage.py migrate flipbook
+python manage.py runserver
 ```
-    pdfjsSrc: url + "js/libs/pdf.min.js",
-    pdfjsCompatibilitySrc: url + "js/libs/compatibility.js",
-    pdfjsWorkerSrc: url + "js/libs/pdf.worker.min.js",
-    threejsSrc: url + "js/libs/three.min.js",
-    mockupjsSrc: url + "js/libs/mockup.min.js",
-    soundFile: url + "sound/turn2.mp3",
-    imagesLocation: url + "images",
-    imageResourcesPath: url + "images/pdfjs/",
-    cMapUrl: url + "cmaps/", 
-``` 
-## 'not authorized' policy error
-If you get a 'not authorized' policy error when uploading a pdf, this has to do with recent changes to ImageMagick. A workaround can be found [here](https://github.com/HazyResearch/fonduer/issues/170). Restart apache afterwards.
+
+Browse to `http://127.0.0.1:8000/flipbook/` and upload PDFs via the Django admin.
+
+## Template customisation
+
+The app ships with `flipbook/templates/flipbook/base.html` as its base layout. To match your site's look and feel, create `templates/flipbook/base.html` in your **project** and extend your own base:
+
+```html
+{% extends "mysite/base.html" %}
+```
+
+Django's template loader will prefer your project-level override.
+
+## Flipbook viewer
+
+The app uses [DearFlip](https://github.com/dearhive/dearflip-js-flipbook) (v1.7.36+, CC BY-NC-ND 4.0 — free for personal/non-commercial use) loaded from jsDelivr CDN. No local assets need to be bundled. DearFlip handles its own built-in PDF viewer and page-turn lightbox — no separate `viewer.html` is required.
+
+## Key changes in v2.0
+
+| Area | Change |
+|---|---|
+| PDF viewer | Replaced pdfjs-flipbook + fancybox + viewer.html with **DearFlip CDN** (v1.7.36+, ships with PDF.js 4.10) |
+| Thumbnail generation | Replaced `Wand` / ImageMagick with `pdf2image` / Poppler — no more "not authorized" policy errors |
+| Signal safety | `post_save` uses `.update()` instead of `instance.save()` — no recursion risk |
+| Storage | All file I/O via Django's `default_storage` — S3, GCS, Azure Blob work out of the box |
+| Validation | MIME magic-byte check added — renaming `.exe` to `.pdf` doesn't bypass validation |
+| Pagination | Library view paginated (12 items per page) |
+| Admin | Thumbnail preview, search and filter in Django admin |
+| URLs | Deprecated `url()` replaced with `path()` (Django 4+) |
+| Templates | Namespaced to `flipbook/` and extensible via `flipbook/base.html` |
+| CMS | `ugettext_lazy` → `gettext_lazy` (Django 4+) |
+| Packaging | Installable via `pip` using `pyproject.toml` |
+
+## django-CMS integration
+
+The app includes an apphook (`flipbook/cms_apps.py`). Attach it to a CMS page to embed the flipbook library inside your CMS layout.
+
+## Development
+
+```bash
+pip install ".[dev]"
+pytest
+```
+
+## License
+
+MIT

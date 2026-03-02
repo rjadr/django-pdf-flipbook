@@ -1,0 +1,5 @@
+include README.md
+include LICENSE
+recursive-include flipbook/templates *
+recursive-include flipbook/static *
+recursive-include flipbook/migrations *

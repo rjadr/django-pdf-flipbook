@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "django-pdf-flipbook"
+version = "2.0.0"
+description = "A reusable Django app that displays a PDF library in a grid and lets you read PDFs as flipbooks."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["django", "pdf", "flipbook", "viewer", "cms"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+]
+dependencies = [
+    "Django>=4.2",
+    "Pillow>=10.0",
+    "pdf2image>=1.17",
+    "python-magic>=0.4.27",
+]
+
+[project.optional-dependencies]
+cms = ["django-cms>=4.0"]
+dev = [
+    "pytest>=8.0",
+    "pytest-django>=4.8",
+    "black>=24.0",
+    "ruff>=0.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-username/django-pdf-flipbook"
+Issues = "https://github.com/your-username/django-pdf-flipbook/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["flipbook*"]
+
+[tool.setuptools.package-data]
+flipbook = [
+    "templates/**/*",
+    "static/**/*",
+    "migrations/**/*",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP"]
+ignore = ["E501"]

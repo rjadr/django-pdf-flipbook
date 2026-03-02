@@ -1,135 +1,135 @@
 # -*- coding: utf-8 -*-
+import logging
+from io import BytesIO
+
+import magic
+from pdf2image import convert_from_bytes
+
+from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models import FileField
 from django.db.models.signals import post_delete, post_save
-from django.core.validators import FileExtensionValidator
-from django.core.files.storage import default_storage
+from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.crypto import get_random_string
-from django.dispatch import receiver
-from django.conf import settings
-import os
-import magic
-from wand.image import Image  
-from wand.color import Color  
 
-class PdfFlipbook(models.Model):  
-    flipbook_title = models.CharField(max_length=24,
-                                        blank=False,
-                                        null=False)
-    modified_date = models.DateTimeField(default=timezone.now,
-                                         blank=True)
-    flipbook_document = models.FileField(upload_to="flipbook/",
-                                            blank=False,
-                                            null=False,
-                                            validators=[FileExtensionValidator(['pdf'])])
-    flipbook_image = models.ImageField(upload_to="flipbook/",  # param optional due to post create
-                                          editable=False)
+logger = logging.getLogger(__name__)
 
+
+def validate_pdf_mime_type(upload):
+    """Reject uploads whose magic bytes do not identify them as a PDF."""
+    upload.seek(0)
+    content_type = magic.from_buffer(upload.read(1024), mime=True)
+    upload.seek(0)
+    if content_type != 'application/pdf':
+        raise ValidationError("Uploaded file is not a valid PDF (detected: %(ct)s).",
+                              params={'ct': content_type})
+
+
+class PdfFlipbook(models.Model):
+    flipbook_title = models.CharField(max_length=24, blank=False, null=False)
+    modified_date = models.DateTimeField(default=timezone.now, blank=True)
+    flipbook_document = models.FileField(
+        upload_to="flipbook/",
+        blank=False,
+        null=False,
+        validators=[FileExtensionValidator(['pdf']), validate_pdf_mime_type],
+    )
+    flipbook_image = models.ImageField(upload_to="flipbook/", editable=False, blank=True)
 
     def save(self, *args, **kwargs):
-        if self.pk:  # if the object already exists in the db
-            old = PdfFlipbook.objects.get(pk=self.pk)
-            old_doc = old.flipbook_document
-            old_image = old.flipbook_image
+        if self.pk:  # updating an existing object
+            try:
+                old = PdfFlipbook.objects.get(pk=self.pk)
+            except PdfFlipbook.DoesNotExist:
+                old = None
 
-            if self.flipbook_document and old_doc:
-                if not self.flipbook_document == old_doc:
-                    old_doc.delete(save=False)
-                    if old_image:  # delete associated image
-                        old_image.delete(save=False)
+            if old and self.flipbook_document and old.flipbook_document:
+                if self.flipbook_document != old.flipbook_document:
+                    old.flipbook_document.delete(save=False)
+                    if old.flipbook_image:
+                        old.flipbook_image.delete(save=False)
+                    self._create_image = True
+        else:  # new object
+            self._create_image = True
 
-                    self._create_image = True  # pass to signal
-        else:  # if the object is new
-            self._create_image = True  # pass to signal
-
-        return super(PdfFlipbook, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return "[{}] {} {}".format(self.flipbook_title, self.flipbook_document, self.flipbook_image)
 
     class Meta:
-        ordering = ['-modified_date'] #sort by upload date - newest first
+        ordering = ['-modified_date']  # newest first
+
 
 @receiver(post_save, sender=PdfFlipbook, dispatch_uid="create_image_after_save")
-def create_image_after_save(sender, instance, **kwargs):  
-    """Create image after `PdfFlipbook` object is saved."""
-    create_image = getattr(instance, '_create_image', False)
+def create_image_after_save(sender, instance, **kwargs):
+    """Generate a thumbnail after a PdfFlipbook is saved."""
+    if not getattr(instance, '_create_image', False):
+        return
 
-    if create_image:
-        pdfpath = os.path.join(settings.MEDIA_ROOT, instance.flipbook_document.name)
-        imgpath = create_image_from_pdf(pdfpath)
-        instance.flipbook_image = 'flipbook/{}'.format(os.path.basename(imgpath))
-        instance._create_image = False  # set to False so infinite loop doesn't occur
-        instance.save()
+    img_name = create_thumbnail_from_pdf(instance.flipbook_document.name)
+    if img_name:
+        # Use .update() so this signal is NOT re-triggered (no recursion risk).
+        PdfFlipbook.objects.filter(pk=instance.pk).update(flipbook_image=img_name)
 
-def create_image_from_pdf(pdfpath):  
-    """Generate image from pdf.
 
-    Saves the image to the MEDIA_ROOT/images directory
+def create_thumbnail_from_pdf(document_name):
+    """Generate a 300-px-wide PNG thumbnail from the first page of a PDF.
 
-    Args
-    ----
-        pdfpath (str)
-            path to pdf
+    Uses pdf2image / poppler — no ImageMagick policy headaches.
+    Works with any Django storage backend (local, S3, GCS, …).
 
-    Returns
-    -------
-        path to the saved image
+    Args:
+        document_name: Storage-relative path of the PDF (e.g. 'flipbook/foo.pdf').
+
+    Returns:
+        Storage-relative path of the saved thumbnail, or None on failure.
     """
-    randname = get_random_string()
-    imgtemp = os.path.join(settings.TEMP_ROOT, '{}.png'.format(randname))
-    imgsaved = os.path.join(settings.MEDIA_ROOT, 'flipbook', '{}.png'.format(randname))
+    try:
+        with default_storage.open(document_name, 'rb') as f:
+            pdf_bytes = f.read()
 
-    # generate temporary image first
-    with Image(filename='{}[0]'.format(pdfpath), resolution=300) as img:
-        img.background_color = Color('white')
-        img.alpha_channel = 'remove'
-        if not os.path.exists(settings.TEMP_ROOT):
-            os.makedirs(settings.TEMP_ROOT)
-        img.save(filename=imgtemp)
+        pages = convert_from_bytes(pdf_bytes, first_page=1, last_page=1, dpi=150)
+        if not pages:
+            return None
 
-    # resize temporary image
-    with Image(filename=imgtemp) as img:
+        img = pages[0]
         width, height = img.size
         if width > 300:
-            ratio = width * 1.0 / 300
-            new_width = 300
-            new_height = height / ratio
-        else:
-            new_width = width
-            new_height = height
-        img.resize(int(new_width), int(new_height))
-        img.save(filename=imgsaved)
-    # delete temp image file
-    os.remove(imgtemp)
+            img = img.resize((300, int(height * 300 / width)))
 
-    return imgsaved
+        buf = BytesIO()
+        img.save(buf, format='PNG')
+        buf.seek(0)
 
-@receiver(post_delete, sender=PdfFlipbook, dispatch_uid="delete_docs_after_save")
-def file_cleanup(sender, **kwargs):
-    """
-    File cleanup callback used to emulate the old delete
-    behavior using signals. Initially django deleted linked
-    files when an object containing a File/ImageField was deleted.
-    Usage:
-    >>> from django.db.models.signals import post_delete
-    >>> post_delete.connect(file_cleanup, sender=MyModel, dispatch_uid="mymodel.file_cleanup")
-    """
-    for fieldname in sender._meta.get_fields():
-        try:
-            field = sender._meta.get_field(fieldname)
-        except:
-            field = None
-        if field and isinstance(field, FileField):
-            inst = kwargs['instance']
-            f = getattr(inst, fieldname)
-            m = inst.__class__._default_manager
-            if hasattr(f, 'path') and os.path.exists(f.path) \
-                and not m.filter(**{'%s__exact' % fieldname: getattr(inst, fieldname)})\
-                .exclude(pk=inst._get_pk_val()):
-                    try:
-                        #os.remove(f.path)
-                        default_storage.delete(f.path)
-                    except:
-                        pass
+        img_name = 'flipbook/{}.png'.format(get_random_string(12))
+        default_storage.save(img_name, ContentFile(buf.read()))
+        return img_name
+
+    except Exception:
+        logger.exception("Thumbnail generation failed for '%s'.", document_name)
+        return None
+
+
+@receiver(post_delete, sender=PdfFlipbook, dispatch_uid="delete_docs_after_delete")
+def file_cleanup(sender, instance, **kwargs):
+    """Delete PDF and thumbnail files when a PdfFlipbook instance is deleted."""
+    for field in sender._meta.get_fields():
+        if not isinstance(field, FileField):
+            continue
+        file_field = getattr(instance, field.name)
+        if not file_field or not file_field.name:
+            continue
+        # Only delete if no other row still references the same file.
+        still_used = sender._default_manager.filter(
+            **{field.name: file_field.name}
+        ).exists()
+        if not still_used:
+            try:
+                default_storage.delete(file_field.name)
+            except Exception:
+                logger.exception("Could not delete file '%s'.", file_field.name)

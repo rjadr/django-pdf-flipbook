@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^cp /Users/rj/Documents/jupyter/django-pdf-flipbook/flipbook/templates/viewer\\.html /Users/rj/Documents/jupyter/django-pdf-flipbook/flipbook/templates/flipbook/viewer\\.html$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
