@@ -51,6 +51,16 @@ try:
             icon = 'doc-full'
             label = 'PDF Flipbook Collection'
 
+        def get_context(self, value, parent_context=None):
+            from flipbook.models import PdfFlipbook
+            ctx = super().get_context(value, parent_context=parent_context)
+            qs = PdfFlipbook.objects.all()
+            col_id = value.get('collection')
+            if col_id:
+                qs = qs.filter(collection_id=col_id)
+            ctx['documents'] = qs
+            return ctx
+
     WAGTAIL_AVAILABLE = True
 
 except ImportError:

@@ -90,51 +90,55 @@ Django's template loader will prefer your project-level override.
 
 The app uses [DearFlip](https://github.com/dearhive/dearflip-js-flipbook) (v1.7.36+, CC BY-NC-ND 4.0 — free for personal/non-commercial use) loaded from jsDelivr CDN. No local assets need to be bundled. DearFlip handles its own built-in PDF viewer and page-turn lightbox — no separate `viewer.html` is required.
 
-## Embedding flipbooks in any page (template tag)
+## Embedding in Wagtail pages (StreamField block)
 
-Instead of a central `/flipbook/` library page, you can embed a PDF grid anywhere using the `{% flipbook_collection %}` template tag — the Django equivalent of a WordPress shortcode.
+The recommended way to display flipbooks in Wagtail is via `FlipbookCollectionBlock`. This is a **one-time setup by a developer** per page model — after that, editors can add, remove, and reorder flipbook grids entirely through the Wagtail admin without touching any code.
 
-```html
-{% load flipbook_tags %}
-
-{# All PDFs #}
-{% flipbook_collection %}
-
-{# Filter by Wagtail Collection pk #}
-{% flipbook_collection 12 %}
-
-{# Filter by Wagtail Collection name #}
-{% flipbook_collection "Annual Reports" %}
-```
-
-The tag renders `flipbook/_collection_grid.html`. It does **not** paginate — it shows all matching items, making it suitable for embedding inside larger pages.
-
-The DearFlip CSS and JS must be present on the host page. Add to your base template:
-
-```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/dflip.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/themify-icons.min.css">
-<!-- before </body> -->
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/js/dflip.min.js"></script>
-```
-
-### Wagtail StreamField block
-
-When Wagtail is installed, editors can drop a flipbook grid into any StreamField page body without any template changes:
+### 1. Add the block to your page model
 
 ```python
+# yourapp/models.py
 from flipbook.blocks import FlipbookCollectionBlock
 from wagtail.fields import StreamField
+from wagtail.blocks import RichTextBlock
+from wagtail.models import Page
 
 class MyPage(Page):
     body = StreamField([
-        ('flipbook', FlipbookCollectionBlock()),
+        ('text', RichTextBlock()),
+        ('flipbook', FlipbookCollectionBlock()),  # ← add this
         # ... other blocks
     ], use_json_field=True)
+
+    content_panels = Page.content_panels + [
+        FieldPanel('body'),
+    ]
 ```
 
-In the Wagtail admin, the block exposes two fields: an optional **heading** and an optional **Collection ID** (leave blank for all PDFs). The block injects the DearFlip CDN scripts itself, so no extra setup is needed in the parent template.
+### 2. Add the block to your page template
+
+```html
+{# yourapp/templates/yourapp/my_page.html #}
+{% load wagtailcore_tags %}
+{% include_block page.body %}
+```
+
+### 3. Migrate
+
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+That's it. In the Wagtail admin, editors now see a **"PDF Flipbook Collection"** block option in the page body. Each block has:
+- **Heading** — optional title shown above the grid
+- **Collection ID** — the pk of the Wagtail Collection to display; leave blank to show all PDFs
+
+The block injects DearFlip CDN scripts automatically — no extra setup in your base template.
+
+## Default library page (plain Django)
+
+For non-Wagtail Django projects, the app provides a ready-made library view at `/flipbook/` that lists all PDFs in a paginated grid with an optional collection filter. This URL is optional for Wagtail users who use the StreamField block instead.
 
 ## Collections (Wagtail)
 

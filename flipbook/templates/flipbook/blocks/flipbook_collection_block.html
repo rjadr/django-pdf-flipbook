@@ -1,23 +1,21 @@
-{% load flipbook_tags static %}
+{# Rendered by FlipbookCollectionBlock.get_context() — 'documents' is passed in automatically. #}
 <section class="flipbook-collection-block py-4">
     {% if value.heading %}
     <h2 class="mb-3">{{ value.heading }}</h2>
     {% endif %}
 
-    {# DearFlip CDN — only injected when the block is actually used #}
+    {# DearFlip CDN — injected once per block usage #}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/dflip.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/themify-icons.min.css">
-
-    {% flipbook_collection value.collection %}
-
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/js/dflip.min.js"></script>
-
     <style>
-        /* Disable DearFlip thumbnail hover slide-up and caption overlay */
         .df-ui-thumb:hover .df-ui-thumb-img img,
         .df-ui-thumb:focus .df-ui-thumb-img img { transform: none !important; transition: none !important; }
         .df-ui-thumb .df-ui-thumb-caption,
         .df-ui-thumb:hover .df-ui-thumb-caption { opacity: 0 !important; pointer-events: none !important; }
     </style>
+
+    {% include 'flipbook/_collection_grid.html' %}
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/js/dflip.min.js"></script>
 </section>
