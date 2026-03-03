@@ -1,0 +1,9 @@
+<td {% if column.classname %}class="{{ column.classname }}"{% endif %}>
+{% if value.name %}
+    <img src="{{ value.url }}"
+         style="height:56px;width:auto;object-fit:cover;border-radius:3px;display:block;"
+         alt="">
+{% else %}
+    <span style="color:#aaa;font-size:0.8em;">—</span>
+{% endif %}
+</td>
