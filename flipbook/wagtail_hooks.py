@@ -9,13 +9,27 @@ present, importing this module is safe — nothing is registered.
 """
 
 try:
-    from django.apps import apps  # noqa: F401 (kept for future conditional use)
     from wagtail.snippets.models import register_snippet
     from wagtail.snippets.views.snippets import SnippetViewSet
     from wagtail.admin.ui.tables import Column, TitleColumn, DateColumn
     from wagtail.admin.panels import FieldPanel
 
-    from flipbook.models import PdfFlipbook
+    from flipbook.models import FlipbookCategory, PdfFlipbook
+
+    class FlipbookCategoryViewSet(SnippetViewSet):
+        """Lets editors create and manage FlipbookCategory entries from within
+        the Wagtail admin — no need to visit the Django admin."""
+
+        model = FlipbookCategory
+        icon = "folder-open-inverse"
+        menu_label = "Flipbook Categories"
+        menu_order = 201
+        add_to_admin_menu = True
+        list_display = ["name"]
+        search_fields = ("name",)
+        panels = [FieldPanel("name")]
+
+    register_snippet(FlipbookCategoryViewSet)
 
     class ThumbnailColumn(Column):
         """

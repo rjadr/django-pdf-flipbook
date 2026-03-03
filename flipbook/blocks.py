@@ -53,30 +53,6 @@ try:
             icon = "doc-full"
             label = "PDF Flipbook"
 
-        class Media:
-            """
-            Declare DearFlip CDN assets here so Wagtail deduplicates them.
-
-            When multiple FlipbookCollectionBlocks appear on the same page,
-            Wagtail merges all block Media objects and emits each URL only once
-            — no more triple-loading of jQuery or dflip.min.js.
-
-            ``flipbook_overrides.css`` is a local static file that suppresses
-            DearFlip's default hover animation (cover slide-up + title fade).
-            """
-
-            css = {
-                "all": [
-                    "https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/dflip.min.css",
-                    "https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/themify-icons.min.css",
-                    "flipbook/css/flipbook_overrides.css",
-                ]
-            }
-            js = [
-                "https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js",
-                "https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/js/dflip.min.js",
-            ]
-
         def get_context(self, value, parent_context=None):
             from flipbook.models import PdfFlipbook
 

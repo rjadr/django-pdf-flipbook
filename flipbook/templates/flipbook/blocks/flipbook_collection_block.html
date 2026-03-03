@@ -1,12 +1,14 @@
 {#
     Rendered by FlipbookCollectionBlock.get_context().
 
-    CSS and JS are declared on FlipbookCollectionBlock.Media so Wagtail
-    collects and deduplicates them across all blocks on the page — even if
-    an editor adds three flipbook blocks, the scripts load only once.
-
-    Do NOT add <script> or <link> tags for DearFlip here.
+    DearFlip CDN scripts are loaded here directly. If your base template
+    already includes jQuery and DearFlip, remove the <script> tags below.
+    If multiple flipbook blocks appear on one page, the JS guard
+    (window._dfLoaded) prevents double-initialisation.
 #}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/dflip.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/themify-icons.min.css">
+
 <section class="flipbook-collection-block py-4">
     {% if value.heading %}
     <h2 class="mb-3">{{ value.heading }}</h2>
@@ -14,3 +16,18 @@
 
     {% include 'flipbook/_collection_grid.html' %}
 </section>
+
+<script>
+(function () {
+    if (window._dfLoaded) return;
+    window._dfLoaded = true;
+    function s(src) {
+        var el = document.createElement('script');
+        el.src = src;
+        el.async = false;
+        document.body.appendChild(el);
+    }
+    s('https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js');
+    s('https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/js/dflip.min.js');
+}());
+</script>
