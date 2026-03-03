@@ -17,14 +17,20 @@ try:
     from flipbook.models import FlipbookCategory, PdfFlipbook
 
     class FlipbookCategoryViewSet(SnippetViewSet):
-        """Lets editors create and manage FlipbookCategory entries from within
-        the Wagtail admin — no need to visit the Django admin."""
+        """
+        Registers FlipbookCategory as a snippet so Wagtail's FK chooser
+        widget on PdfFlipbook renders a "+" button for inline category
+        creation (modal, no page navigation required).
+
+        Hidden from the sidebar — categories are managed directly from
+        the PdfFlipbook edit form via the chooser widget.
+        """
 
         model = FlipbookCategory
         icon = "folder-open-inverse"
         menu_label = "Flipbook Categories"
         menu_order = 201
-        add_to_admin_menu = True
+        add_to_admin_menu = False  # No sidebar entry; managed via PdfFlipbook chooser
         list_display = ["name"]
         search_fields = ("name",)
         panels = [FieldPanel("name")]
