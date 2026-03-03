@@ -36,7 +36,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-cms = ["django-cms>=4.0", "wagtail>=5.0"]
+# Wagtail StreamField block + snippet admin
+wagtail = ["wagtail>=5.2"]
+# Django CMS apphook + CMSPlugin
+cms = ["django-cms>=4.0"]
+# Everything — Wagtail AND Django CMS
+full = ["django-pdf-flipbook[wagtail,cms]"]
 dev = [
     "pytest>=8.0",
     "pytest-django>=4.8",

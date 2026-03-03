@@ -19,6 +19,28 @@ from django.utils.crypto import get_random_string
 logger = logging.getLogger(__name__)
 
 
+class FlipbookCategory(models.Model):
+    """A simple grouping label for PDFs — no external dependencies.
+
+    Use this to organise PDFs into collections visible in the library view and
+    selectable in the Wagtail StreamField block or the Django CMS plugin.
+
+    This model is always present regardless of whether Wagtail or Django CMS is
+    installed, which avoids the migration trap caused by an optional FK to
+    ``wagtailcore.Collection``.
+    """
+
+    name = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Flipbook category"
+        verbose_name_plural = "Flipbook categories"
+
+    def __str__(self):
+        return self.name
+
+
 def validate_pdf_mime_type(upload):
     """Reject uploads whose magic bytes do not identify them as a PDF."""
     upload.seek(0)
@@ -44,15 +66,13 @@ class PdfFlipbook(models.Model):
         db_index=True,
         help_text="Lower numbers appear first. Items with the same number are sorted by upload date.",
     )
-    # Optional Wagtail collection support. Requires wagtail to be installed.
-    # FK is defined as a lazy string reference so the model loads fine without Wagtail.
-    collection = models.ForeignKey(
-        'wagtailcore.Collection',
+    category = models.ForeignKey(
+        "FlipbookCategory",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name='flipbook_documents',
-        help_text="Wagtail collection this PDF belongs to (optional).",
+        related_name="flipbooks",
+        help_text="Optional category for grouping and filtering.",
     )
 
     def save(self, *args, **kwargs):
@@ -77,12 +97,56 @@ class PdfFlipbook(models.Model):
         return "[{}] {} {}".format(self.flipbook_title, self.flipbook_document, self.flipbook_image)
 
     class Meta:
-        ordering = ['sort_order', '-modified_date']
+        ordering = ["sort_order", "-modified_date"]
+
+
+# ── Optional Django CMS plugin model ─────────────────────────────────────────
+try:
+    from cms.models.pluginmodel import CMSPlugin  # noqa: E402
+
+    class FlipbookCollectionPluginModel(CMSPlugin):
+        """Configuration for the Django CMS FlipbookCollectionPlugin.
+
+        Editors set a heading and an optional collection ID in the CMS plugin
+        dialog.  Leave collection_id blank to display all PDFs.
+        """
+
+        heading = models.CharField(
+            max_length=255,
+            blank=True,
+            help_text="Optional heading displayed above the flipbook grid.",
+        )
+        category = models.ForeignKey(
+            "flipbook.FlipbookCategory",
+            null=True,
+            blank=True,
+            on_delete=models.SET_NULL,
+            help_text="Filter to a specific category. Leave blank to show all PDFs.",
+        )
+
+        class Meta:
+            app_label = "flipbook"
+
+        def __str__(self):
+            return self.heading or "Flipbook Collection"
+
+except ImportError:
+    FlipbookCollectionPluginModel = None  # type: ignore[assignment,misc]
 
 
 @receiver(post_save, sender=PdfFlipbook, dispatch_uid="create_image_after_save")
 def create_image_after_save(sender, instance, **kwargs):
-    """Generate a thumbnail after a PdfFlipbook is saved."""
+    """Generate a thumbnail after a PdfFlipbook is saved.
+
+    .. note:: **Synchronous processing**
+
+        Thumbnail generation runs inside the request–response cycle.  For small
+        PDFs this is imperceptible, but large files (> ~50 MB) may cause the
+        admin to hang for several seconds.
+
+        To offload this work, consider overriding this signal in your project
+        and dispatching to a task queue (Celery, Django-Q, etc.).
+    """
     if not getattr(instance, '_create_image', False):
         return
 

@@ -9,7 +9,7 @@ present, importing this module is safe — nothing is registered.
 """
 
 try:
-    from django.apps import apps
+    from django.apps import apps  # noqa: F401 (kept for future conditional use)
     from wagtail.snippets.models import register_snippet
     from wagtail.snippets.views.snippets import SnippetViewSet
     from wagtail.admin.ui.tables import Column, TitleColumn, DateColumn
@@ -30,8 +30,6 @@ try:
         def get_value(self, instance):
             return instance.flipbook_image
 
-    # Build list_display dynamically so the collection column only appears
-    # when wagtailcore is installed (collection FK may be NULL otherwise).
     _list_display = [
         ThumbnailColumn("flipbook_image", label="", width="80px"),
         TitleColumn(
@@ -39,15 +37,10 @@ try:
             label="Title",
             url_name="wagtailsnippets_flipbook_pdfflipbook:edit",
         ),
+        Column("category", label="Category", sort_key="category__name"),
         Column("sort_order", label="Order", sort_key="sort_order"),
         DateColumn("modified_date", label="Modified", sort_key="modified_date"),
     ]
-
-    if apps.is_installed("wagtail"):
-        _list_display.insert(
-            3,
-            Column("collection", label="Collection", sort_key="collection__name"),
-        )
 
     class PdfFlipbookViewSet(SnippetViewSet):
         model = PdfFlipbook
@@ -56,7 +49,7 @@ try:
         menu_order = 200
         add_to_admin_menu = True
         list_display = _list_display
-        list_filter = ("collection",) if apps.is_installed("wagtail") else ()
+        list_filter = ("category",)
         search_fields = ("flipbook_title",)
         ordering = ("sort_order", "-modified_date")
 
@@ -64,7 +57,7 @@ try:
             FieldPanel("flipbook_title"),
             FieldPanel("flipbook_document"),
             FieldPanel("sort_order"),
-            FieldPanel("collection"),
+            FieldPanel("category"),
         ]
 
     register_snippet(PdfFlipbookViewSet)

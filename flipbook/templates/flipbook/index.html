@@ -1,4 +1,5 @@
 {% extends "flipbook/base.html" %}
+{% load static %}
 
 {% block title %}PDF Flipbook Library{% endblock %}
 
@@ -8,37 +9,23 @@
       crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/dflip.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/themify-icons.min.css">
-<style>
-    /* Stop cover image from sliding up on hover */
-    ._df_thumb:hover ._df_book-cover {
-        transform: none !important;
-        top: 0 !important;
-        margin-top: 0 !important;
-    }
-    /* Hide title overlay */
-    ._df_thumb ._df_book-title,
-    ._df_thumb .df-book-title {
-        display: none !important;
-        opacity: 0 !important;
-        visibility: hidden !important;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'flipbook/css/flipbook_overrides.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="container py-4">
     <h1 class="mb-4">PDF Library</h1>
 
-    {# Collection filter (only rendered when Wagtail collections are available) #}
-    {% if collections %}
+    {# Category filter bar — shown when at least one category exists #}
+    {% if categories %}
     <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
-        <a href="?" class="btn btn-sm {% if not active_collection %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+        <a href="?" class="btn btn-sm {% if not active_category %}btn-primary{% else %}btn-outline-secondary{% endif %}">
             All
         </a>
-        {% for col in collections %}
-        <a href="?collection={{ col.pk }}"
-           class="btn btn-sm {% if active_collection == col.pk %}btn-primary{% else %}btn-outline-secondary{% endif %}">
-            {{ col.name }}
+        {% for cat in categories %}
+        <a href="?category={{ cat.pk }}"
+           class="btn btn-sm {% if active_category == cat.pk %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+            {{ cat.name }}
         </a>
         {% endfor %}
     </div>

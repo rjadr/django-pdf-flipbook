@@ -1,30 +1,16 @@
-{# Rendered by FlipbookCollectionBlock.get_context() — 'documents' is passed in automatically. #}
+{#
+    Rendered by FlipbookCollectionBlock.get_context().
+
+    CSS and JS are declared on FlipbookCollectionBlock.Media so Wagtail
+    collects and deduplicates them across all blocks on the page — even if
+    an editor adds three flipbook blocks, the scripts load only once.
+
+    Do NOT add <script> or <link> tags for DearFlip here.
+#}
 <section class="flipbook-collection-block py-4">
     {% if value.heading %}
     <h2 class="mb-3">{{ value.heading }}</h2>
     {% endif %}
 
-    {# DearFlip CDN — injected once per block usage #}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/dflip.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/themify-icons.min.css">
-    <style>
-        /* Stop cover image from sliding up on hover */
-        ._df_thumb:hover ._df_book-cover {
-            transform: none !important;
-            top: 0 !important;
-            margin-top: 0 !important;
-        }
-        /* Hide title overlay */
-        ._df_thumb ._df_book-title,
-        ._df_thumb .df-book-title {
-            display: none !important;
-            opacity: 0 !important;
-            visibility: hidden !important;
-        }
-    </style>
-
     {% include 'flipbook/_collection_grid.html' %}
-
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/js/dflip.min.js"></script>
 </section>

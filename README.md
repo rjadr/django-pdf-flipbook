@@ -2,6 +2,18 @@
 
 A reusable Django app that displays a PDF library in a responsive grid and lets visitors read them as interactive flipbooks.
 
+> ⚠️ **License notice — DearFlip**
+>
+> This app uses [DearFlip](https://github.com/dearhive/dearflip-js-flipbook) as its PDF viewer engine,
+> loaded from the jsDelivr CDN at runtime.
+>
+> **DearFlip is licensed under [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/) —
+> free for personal / non-commercial use only.**
+>
+> If you are deploying this app on a **commercial website or for a paying client**, you must
+> purchase a DearFlip commercial licence from [dearhive.com](https://dearhive.com) before going live.
+> The MIT licence of *this* package covers only the Python/Django wrapper code, not the DearFlip engine.
+
 ## Requirements
 
 - Python ≥ 3.10
@@ -25,7 +37,14 @@ sudo apt-get install poppler-utils
 ### 2. Install the package
 
 ```bash
+# Core install (plain Django or Wagtail)
 pip install git+https://github.com/rjadr/django-pdf-flipbook.git
+
+# With Wagtail StreamField block + snippet admin
+pip install "git+https://github.com/rjadr/django-pdf-flipbook.git#egg=django-pdf-flipbook[wagtail]"
+
+# With Django CMS apphook + CMSPlugin
+pip install "git+https://github.com/rjadr/django-pdf-flipbook.git#egg=django-pdf-flipbook[cms]"
 ```
 
 Python dependencies installed automatically: `Django>=4.2`, `Pillow>=10.0`, `pdf2image>=1.17`, `python-magic>=0.4.27`.
@@ -88,7 +107,12 @@ Django's template loader will prefer your project-level override.
 
 ## Flipbook viewer
 
-The app uses [DearFlip](https://github.com/dearhive/dearflip-js-flipbook) (v1.7.36+, CC BY-NC-ND 4.0 — free for personal/non-commercial use) loaded from jsDelivr CDN. No local assets need to be bundled. DearFlip handles its own built-in PDF viewer and page-turn lightbox — no separate `viewer.html` is required.
+The app uses [DearFlip](https://github.com/dearhive/dearflip-js-flipbook) (v1.7.36+) loaded from
+jsDelivr CDN. No local assets need to be bundled. DearFlip handles its own built-in PDF viewer and
+page-turn lightbox.
+
+> **License reminder**: DearFlip is **CC BY-NC-ND 4.0** — non-commercial use only.
+> Purchase a licence at [dearhive.com](https://dearhive.com) for commercial deployments.
 
 ## Embedding in Wagtail pages (StreamField block)
 
@@ -142,7 +166,7 @@ For non-Wagtail Django projects, the app provides a ready-made library view at `
 
 ## Collections (Wagtail)
 
-When Wagtail is installed (`pip install "django-pdf-flipbook[cms]"`), each flipbook can be assigned to a Wagtail Collection. The library view will show a filter bar at the top letting visitors browse by collection.
+When Wagtail is installed (`pip install "django-pdf-flipbook[wagtail]"`), each flipbook can be assigned to a Wagtail Collection. The library view will show a filter bar at the top letting visitors browse by collection.
 
 ```python
 # In your flipbook admin, the Collection field appears automatically
@@ -180,7 +204,28 @@ Each flipbook has a `sort_order` integer field (default `0`). Lower numbers appe
 
 ## django-CMS integration
 
-The app includes an apphook (`flipbook/cms_apps.py`). Attach it to a CMS page to embed the flipbook library inside your CMS layout.
+The app provides two integration points for django-CMS:
+
+### Apphook (`cms_apps.py`)
+
+Mount the entire `/flipbook/` URL tree onto a CMS page. Editors get a
+standalone, paginated PDF library page inside their CMS layout.
+
+### CMSPlugin (`cms_plugins.py`)
+
+Drop a flipbook grid *into any existing page layout* via the standard
+ **"Add plugin"** button in the CMS toolbar — just like a text or image plugin.
+
+Requires `pip install "django-pdf-flipbook[cms]"` and a migration:
+
+```bash
+python manage.py makemigrations flipbook
+python manage.py migrate
+```
+
+Each plugin instance lets editors set:
+- **Heading** — optional title shown above the grid
+- **Collection ID** — pk of the collection to display; blank = show all PDFs
 
 ## Development
 

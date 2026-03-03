@@ -1,0 +1,21 @@
+{# Rendered by FlipbookCollectionPlugin — 'documents' and 'instance' are passed in. #}
+{# sekizai_tags deduplicate CSS/JS across multiple plugin instances on the same page. #}
+{% load static sekizai_tags %}
+
+<section class="flipbook-collection-plugin py-4">
+    {% if instance.heading %}
+    <h2 class="mb-3">{{ instance.heading }}</h2>
+    {% endif %}
+
+    {% include 'flipbook/_collection_grid.html' %}
+</section>
+
+{% addtoblock "css" %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/dflip.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/css/themify-icons.min.css">
+{% endaddtoblock %}
+
+{% addtoblock "js" %}
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook/dflip/js/dflip.min.js"></script>
+{% endaddtoblock %}
